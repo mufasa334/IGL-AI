@@ -3,22 +3,20 @@ package org.example;
 import java.io.IOException;
 
 public class TextToSpeech {
+    private static boolean speaking = false;
 
-    public static void speak(String text) {
-        try {
-            if (text == null || text.isEmpty()) return;
+    public static synchronized void speak(String text) {
+        if (speaking || text == null || text.isEmpty()) return;
+        speaking = true;
 
-            // Clean up text to prevent PowerShell errors
-            String cleanText = text.replace("\"", "").replace("'", "");
-
-            // Use Windows built-in Text-to-Speech via PowerShell
-            String command = "PowerShell -Command \"Add-Type –AssemblyName System.Speech; " +
-                    "(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('" + cleanText + "');\"";
-
-            Runtime.getRuntime().exec(command);
-
-        } catch (IOException e) {
-            System.err.println("❌ Audio Error: " + e.getMessage());
-        }
+        new Thread(() -> {
+            try {
+                String clean = text.replace("\"", "").replace("'", "");
+                String cmd = "PowerShell -Command \"Add-Type -AssemblyName System.Speech; " +
+                        "(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('" + clean + "');\"";
+                Runtime.getRuntime().exec(cmd).waitFor();
+            } catch (Exception ignored) {}
+            speaking = false;
+        }).start();
     }
 }

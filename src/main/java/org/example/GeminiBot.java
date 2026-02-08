@@ -1,101 +1,125 @@
 package org.example;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.*;
 import java.util.Base64;
-import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 public class GeminiBot {
 
-    // ⚠️ ENSURE YOUR API KEY IS ACTIVE
-    private static final String API_KEY = "AIzaSyBsEZH1rPecRg2LmBSZjZVKDd0yolaTGDA";
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" + API_KEY;
+    private static final String API_KEY = System.getenv("GEMINI_API_KEY");
 
-    public static String getStrategy(File imageFile, String gameData) {
+    public static String getStrategy(File imageFile, String agent, String phase) {
+        if (API_KEY == null) return "COACH: ERROR | API KEY MISSING";
+
         try {
-            if (!imageFile.exists()) return "Error: File missing";
+            // ✅ FIX 1: Use Gemini 3 for Hackathon points (Dec 2025 release)
+            String fullUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + API_KEY;
 
-            // 🎯 NEW: Extract 'phase' from the incoming gameData string
-            // This pulls 'COMBAT_POST_PLANT' or 'SETUP_PHASE' so the prompt works.
-            String phase = gameData.contains("PHASE: ") ? gameData.split("PHASE: ")[1] : "UNKNOWN";
+            String prompt = String.format("""
+            You are a professional Valorant IGL coach.
 
-            byte[] fileContent = compressImage(imageFile);
-            String encodedImage = Base64.getEncoder().encodeToString(fileContent);
+GAME STATE (DO NOT GUESS):
+AGENT = %s
+PHASE = %s
 
-            // 🧠 IMMORTAL COACH V6: PRIORITY BRANCHING LOGIC
-            String rawPrompt = "You are an Immortal Valorant Coach.\n" +
-                    "CURRENT PHASE: " + phase + "\n" +
-                    "STRICT OPERATING RULES:\n" +
-                    "1. IF PHASE IS 'COMBAT_POST_PLANT': DO NOT suggest placing utility. Focus ONLY on crosshair placement, off-angles, and playing for time.\n" +
-                    "2. IF PHASE IS 'SETUP_PHASE': Focus on pixel-perfect Tripwires and Cages.\n" +
-                    "3. PROACTIVE WARNING: Always warn the player about the most likely 'Contact Zone' (e.g., Garden or Window).\n" +
-                    "\n" +
-                    "STRICT FORMAT: 'COACH: [ACTION] | [PHASE-SPECIFIC REASONING]'.";
+RULES:
+1. NEVER guess agent or phase.
+2. If PHASE = POST_PLANT -> NEVER mention planting the spike.
+3. Do NOT mention team numbers unless provided.
+4. Do NOT mention ultimate unless HUD confirms it.
+5. If unsure, OMIT the detail.
 
-            String jsonInputString = "{"
-                    + "\"contents\": [{"
-                    + "\"role\": \"user\","
-                    + "\"parts\": ["
-                    + "{\"text\": \"" + rawPrompt.replace("\n", "\\n") + "\"},"
-                    + "{\"inline_data\": {\"mime_type\":\"image/jpeg\",\"data\": \"" + encodedImage + "\"}}"
-                    + "]"
-                    + "}],"
-                    + "\"generationConfig\": {"
-                    + "  \"temperature\": 0.1,"
-                    + "  \"topP\": 0.1,"
-                    + "  \"maxOutputTokens\": 120"
-                    + "}"
-                    + "}";
+COMMAND TYPES:
+- Hold angle
+- Swing with teammate
+- Use wall/slow/smoke
+- Play time
+- Peek for info
 
-            URL url = new URL(API_URL);
+FORMAT:
+COACH: <AGENT> | <COMMAND> | <SHORT REASON> | CONFIDENCE: HIGH/MEDIUM/LOW
+
+Do NOT invent game state.
+Keep output under 25 words.
+""", agent, phase);
+
+            byte[] imgBytes = resizeAndCompress(imageFile);
+            String base64 = Base64.getEncoder().encodeToString(imgBytes);
+
+            // Build JSON using org.json (Cleaner & Safer)
+            JSONObject root = new JSONObject();
+            JSONArray contents = new JSONArray();
+            JSONObject content = new JSONObject();
+            JSONArray parts = new JSONArray();
+
+            parts.put(new JSONObject().put("text", prompt));
+            parts.put(new JSONObject().put("inline_data",
+                    new JSONObject()
+                            .put("mime_type", "image/jpeg")
+                            .put("data", base64)));
+
+            content.put("parts", parts);
+            contents.put(content);
+            root.put("contents", contents);
+
+            URL url = new URI(fullUrl).toURL();
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
             con.setDoOutput(true);
 
             try (OutputStream os = con.getOutputStream()) {
-                byte[] input = jsonInputString.getBytes("utf-8");
-                os.write(input, 0, input.length);
+                os.write(root.toString().getBytes("utf-8"));
             }
 
-            int status = con.getResponseCode();
-            if (status == 429) return "RATE_LIMIT";
-            if (status != 200) return "Error " + status;
+            int code = con.getResponseCode();
+            InputStream stream = (code >= 400) ? con.getErrorStream() : con.getInputStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) response.append(line);
 
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) response.append(line.trim());
-
-                String raw = response.toString();
-                if (raw.contains("\"text\": \"")) {
-                    int start = raw.indexOf("\"text\": \"") + 9;
-                    int end = raw.indexOf("\"", start);
-                    return raw.substring(start, end).replace("\\n", " ").replace("*", "").trim();
-                }
-                return "STANDBY: Analyzing State...";
+            if (code >= 400) {
+                System.out.println("❌ GEMINI ERROR BODY:");
+                System.out.println(response);
+                return "COACH: ERROR | Gemini API " + code;
             }
+
+            JSONObject json = new JSONObject(response.toString());
+            return json.getJSONArray("candidates")
+                    .getJSONObject(0)
+                    .getJSONObject("content")
+                    .getJSONArray("parts")
+                    .getJSONObject(0)
+                    .getString("text")
+                    .replace("\n", " ")
+                    .trim();
+
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            e.printStackTrace();
+            return "COACH: ERROR | " + e.getMessage();
         }
     }
 
-    private static byte[] compressImage(File file) throws Exception {
-        BufferedImage image = ImageIO.read(file);
+    // Resize screenshot to avoid Gemini payload limit
+    private static byte[] resizeAndCompress(File file) throws Exception {
+        BufferedImage original = ImageIO.read(file);
+
+        // ✅ FIX 2: 360p is too blurry for UI text. 720p is safer for reading HUD.
+        int w = 1280, h = 720;
+
+        BufferedImage resized = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = resized.createGraphics();
+        g.drawImage(original, 0, 0, w, h, null);
+        g.dispose();
+
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-
-        javax.imageio.ImageWriter writer = javax.imageio.ImageIO.getImageWritersByFormatName("jpg").next();
-        javax.imageio.ImageWriteParam param = writer.getDefaultWriteParam();
-
-        param.setCompressionMode(javax.imageio.ImageWriteParam.MODE_EXPLICIT);
-        param.setCompressionQuality(0.9f); // High-Def Scan
-
-        writer.setOutput(javax.imageio.ImageIO.createImageOutputStream(os));
-        writer.write(null, new javax.imageio.IIOImage(image, null, null), param);
-
-        writer.dispose();
+        ImageIO.write(resized, "jpg", os);
         return os.toByteArray();
     }
 }

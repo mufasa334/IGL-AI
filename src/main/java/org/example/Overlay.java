@@ -16,7 +16,6 @@ public class Overlay {
     private static Stage overlayStage;
 
     public static void launchOverlay() {
-        // ✅ The Fix: Use Platform.runLater to open a new window on the existing thread
         Platform.runLater(() -> {
             overlayStage = new Stage();
             statusLabel = new Label("IGL-AI: INITIALIZING...");

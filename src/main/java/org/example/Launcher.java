@@ -1,5 +1,6 @@
 package org.example;
 
+import javafx.scene.control.ComboBox;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -20,12 +21,12 @@ public class Launcher extends Application {
     private ProgressBar progressBar;
     private TextArea consoleLog;
     private Stage mainStage;
+    private ComboBox<String> agentSelector; // ✅ Agent dropdown
 
     @Override
     public void start(Stage primaryStage) {
         this.mainStage = primaryStage;
 
-        // --- 1. HEADER (Your Styled Title) ---
         Label title = new Label("IGL-AI // NEURAL LINK");
         title.setTextFill(Color.web("#ff4655"));
         title.setFont(Font.font("Impact", 36));
@@ -34,10 +35,16 @@ public class Launcher extends Application {
         VBox header = new VBox(5, title);
         header.setAlignment(Pos.CENTER);
 
-        // --- 2. CONFIGURATION & LOG ---
         VBox settingsBox = new VBox(15);
         settingsBox.setPadding(new Insets(20));
         settingsBox.setStyle("-fx-border-color: #444; -fx-background-color: rgba(28, 37, 46, 0.8);");
+
+        // ✅ AGENT SELECTOR UI
+        agentSelector = new ComboBox<>();
+        agentSelector.getItems().addAll("AUTO", "SAGE", "JETT", "REYNA", "OMEN");
+        agentSelector.setValue("AUTO");
+
+        settingsBox.getChildren().addAll(new Label("Agent Override:"), agentSelector);
 
         consoleLog = new TextArea("> SYSTEM IDLE...\n");
         consoleLog.setEditable(false);
@@ -47,7 +54,6 @@ public class Launcher extends Application {
         HBox mainContent = new HBox(20, settingsBox, consoleLog);
         mainContent.setAlignment(Pos.CENTER);
 
-        // --- 3. LAUNCH CONTROL ---
         progressBar = new ProgressBar(0);
         progressBar.setPrefWidth(600);
         progressBar.setVisible(false);
@@ -55,7 +61,6 @@ public class Launcher extends Application {
         Button launchBtn = new Button("INITIALIZE SYSTEM");
         launchBtn.setStyle("-fx-background-color: #ff4655; -fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
 
-        // ✅ THIS TRIGGERS THE SEQUENCE
         launchBtn.setOnAction(e -> startInjectionSequence(launchBtn));
 
         VBox root = new VBox(30, header, mainContent, progressBar, launchBtn);
@@ -71,6 +76,7 @@ public class Launcher extends Application {
     private void startInjectionSequence(Button btn) {
         btn.setDisable(true);
         progressBar.setVisible(true);
+
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.ZERO, e -> consoleLog.appendText("> Initializing Kernel...\n")),
                 new KeyFrame(Duration.seconds(1.0), e -> {
@@ -81,7 +87,6 @@ public class Launcher extends Application {
                     progressBar.setProgress(1.0);
                     consoleLog.appendText("> Neural Link Established.\n");
 
-                    // 🚀 THE MAGIC: Close launcher and start the game engine
                     mainStage.close();
                     startMainSystem();
                 })
@@ -90,9 +95,10 @@ public class Launcher extends Application {
     }
 
     private void startMainSystem() {
-        // Run in a background thread so the UI doesn't freeze
         new Thread(() -> {
             try {
+                // ✅ Pass agent override to Main
+                System.setProperty("agent", agentSelector.getValue());
                 Main.runGameLoop();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -101,6 +107,6 @@ public class Launcher extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args); // This starts the JavaFX life-cycle
+        launch(args);
     }
 }

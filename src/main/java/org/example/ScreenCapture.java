@@ -1,4 +1,5 @@
 package org.example;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,25 +12,23 @@ public class ScreenCapture {
 
     public ScreenCapture() {
         try {
-            // "Robot" is a Java tool that can control mouse/keyboard and screen
             this.robot = new Robot();
-            // Get the size of your main monitor
-            this.screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+
+            // ✅ Explicit full-screen rectangle (clear + hackathon safe)
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            this.screenRect = new Rectangle(0, 0, screenSize.width, screenSize.height);
+
         } catch (AWTException e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * Takes a screenshot of the entire screen.
-     */
+    /** Takes a screenshot */
     public BufferedImage capture() {
         return robot.createScreenCapture(screenRect);
     }
 
-    /**
-     * Saves the image to a file (so we can test if it works)
-     */
+    /** Saves screenshot to file */
     public void saveImage(BufferedImage image, String filename) {
         try {
             File outputfile = new File(filename);
