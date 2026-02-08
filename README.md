@@ -14,12 +14,12 @@ Unlike static overlays, IGL-AI uses **Google Gemini 3's multimodal vision capabi
 
 * **🧠 Multimodal Perception**: Captures your screen in real-time and uses Gemini 3 Flash to "see" the battlefield.
 * **🗣️ Live Audio Coaching**: Converts tactical text strategies into speech using system TTS (PowerShell integration).
-* **🛡️ Hallucination Filters**: Custom logic gates in Java prevent the AI from inventing fake game states (e.g., stopping "Defuse" calls when you are Attacking).
+* **🛡️ Hallucination Filters**: Custom Java logic gates prevent the AI from inventing fake game states (e.g., stopping "Defuse" calls when you are Attacking).
 * **👁️ Computer Vision Sensors**:
-    * **Agent Detection**: Automatically identifies if you are playing Sage, Neon, Jett, etc.
-    * **Phase Detection**: Detects if the Spike is planted or if it's mid-round combat.
-* **💻 Cyberpunk Launcher**: A "Neural Link" themed JavaFX control panel for immersive startup.
-* **🖥️ Transparent Overlay**: Displays the AI's "Thought Process" and confidence levels directly on your screen.
+    * **Hybrid Agent Detection**: Includes a "Neural Link" Launcher to manually select your agent (Jett, Reyna, Omen, etc.) or uses experimental Computer Vision to auto-detect agents like Sage/Neon.
+    * **Phase Detection**: automatically detects if the Spike is planted or if the round is in the combat phase.
+* **💻 Cyberpunk Launcher**: A custom JavaFX control panel for immersive startup and configuration.
+* **🖥️ Transparent Overlay**: Displays the AI's "Thought Process" and confidence levels directly on top of your game.
 
 ## 🛠️ Tech Stack
 
@@ -63,7 +63,7 @@ Right-click Launcher.java and select Run 'Launcher.main()'.
 
 The Neural Link Launcher will appear:
 
-Select your Agent (or leave on AUTO).
+Select your Agent (e.g., SAGE) or leave on AUTO.
 
 Click INITIALIZE SYSTEM.
 
@@ -74,7 +74,9 @@ The AI will begin coaching you automatically!
 ⚠️ Troubleshooting
 "API Key Missing": Make sure you set the environment variable correctly in your Run Configuration or System Settings.
 
-Overlay not showing: Ensure you run the game in Windowed Fullscreen mode so the JavaFX overlay can sit on top.
+Overlay not showing: Ensure you run Valorant in Windowed Fullscreen mode so the JavaFX overlay can sit on top.
+
+Auto-Detect failing: The "AUTO" agent feature relies on specific HUD coordinates (1080p). If it fails, use the Dropdown in the Launcher to manually select your agent.
 
 Audio issues: The system uses PowerShell for TTS. Ensure your Windows volume is up.
 
@@ -87,3 +89,5 @@ Fair Play: This tool is a Proof of Concept for the Gemini 3 Hackathon. It reads 
 
 🏆 Hackathon Context
 This project explores the Multimodal Grounding capabilities of Gemini 3. By combining specific pixel-color sensors (Java) with general visual reasoning (Gemini), we solved the common "LLM Hallucination" problem in fast-paced gaming environments.
+
+Created for the Gemini 3 Global Challenge.
