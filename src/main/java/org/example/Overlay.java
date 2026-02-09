@@ -20,7 +20,7 @@ public class Overlay {
             overlayStage = new Stage();
             statusLabel = new Label("IGL-AI: INITIALIZING...");
             statusLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-            statusLabel.setTextFill(Color.web("#ff4655")); // Valorant Red
+            statusLabel.setTextFill(Color.RED);
 
             VBox root = new VBox(statusLabel);
             root.setAlignment(Pos.TOP_CENTER);
