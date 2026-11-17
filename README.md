@@ -12,7 +12,7 @@ Unlike static overlays, IGL-AI uses **Google Gemini 3's multimodal vision capabi
 
 ## 🎥 Live Demo
 
-[![IGL-AI: Real-Time Gemini 3 Tactical Coach (Hackathon Demo)](https://img.youtube.com/vi/YOUR_VIDEO_ID/hqdefault.jpg)](https://www.youtube.com/watch?v=58_eMDFLQtk)
+[![IGL-AI: Real-Time Gemini 3 Tactical Coach (Hackathon Demo)](./Screenshot%202026-11-17%20145748.png)](https://www.youtube.com/watch?v=58_eMDFLQtk)
 
 *Click the thumbnail above to watch the full demo with live audio coaching on YouTube.*
 
