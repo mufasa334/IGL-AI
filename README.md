@@ -10,24 +10,30 @@
 
 Unlike static overlays, IGL-AI uses **Google Gemini 3's multimodal vision capabilities** to analyze the game state (Agent, Spike Status, Phase, and Position) and generate concise, tactical audio commands instantly. It acts as a grounded "Backseat Gamer" that actually helps you win.
 
+## 🎥 Live Demo
+
+[![IGL-AI: Real-Time Gemini 3 Tactical Coach (Hackathon Demo)](https://img.youtube.com/vi/YOUR_VIDEO_ID/hqdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+
+*Click the thumbnail above to watch the full demo with live audio coaching on YouTube.*
+
 ## ⚡ Key Features
 
-* **🧠 Multimodal Perception**: Captures your screen in real-time and uses Gemini 3 Flash to "see" the battlefield.
-* **🗣️ Live Audio Coaching**: Converts tactical text strategies into speech using system TTS (PowerShell integration).
-* **🛡️ Hallucination Filters**: Custom Java logic gates prevent the AI from inventing fake game states (e.g., stopping "Defuse" calls when you are Attacking).
-* **👁️ Computer Vision Sensors**:
-    * **Hybrid Agent Detection**: Includes a "Neural Link" Launcher to manually select your agent (Jett, Reyna, Omen, etc.) or uses experimental Computer Vision to auto-detect agents like Sage/Neon.
-    * **Phase Detection**: automatically detects if the Spike is planted or if the round is in the combat phase.
-* **💻 Cyberpunk Launcher**: A custom JavaFX control panel for immersive startup and configuration.
-* **🖥️ Transparent Overlay**: Displays the AI's "Thought Process" and confidence levels directly on top of your game.
+- **🧠 Multimodal Perception**: Captures your screen in real-time and uses Gemini 3 Flash to "see" the battlefield.
+- **🗣️ Live Audio Coaching**: Converts tactical text strategies into speech using system TTS (PowerShell integration).
+- **🛡️ Hallucination Filters**: Custom Java logic gates prevent the AI from inventing fake game states (e.g., stopping "Defuse" calls when you are Attacking).
+- **👁️ Computer Vision Sensors**:
+  - **Hybrid Agent Detection**: Includes a "Neural Link" Launcher to manually select your agent (Jett, Reyna, Omen, etc.) or uses experimental Computer Vision to auto-detect agents like Sage/Neon.
+  - **Phase Detection**: automatically detects if the Spike is planted or if the round is in the combat phase.
+- **💻 Cyberpunk Launcher**: A custom JavaFX control panel for immersive startup and configuration.
+- **🖥️ Transparent Overlay**: Displays the AI's "Thought Process" and confidence levels directly on top of your game.
 
 ## 🛠️ Tech Stack
 
-* **Language**: Java 21
-* **Framework**: JavaFX (UI & Overlay)
-* **AI Model**: Google Gemini 3 Flash Preview (via REST API)
-* **JSON Parsing**: `org.json`
-* **System Integration**: `java.awt.Robot` (Screen Capture) & PowerShell (TTS)
+- **Language**: Java 21
+- **Framework**: JavaFX (UI & Overlay)
+- **AI Model**: Google Gemini 3 Flash Preview (via REST API)
+- **JSON Parsing**: `org.json`
+- **System Integration**: `java.awt.Robot` (Screen Capture) & PowerShell (TTS)
 
 ## 🚀 Installation & Setup
 
@@ -38,8 +44,9 @@ Unlike static overlays, IGL-AI uses **Google Gemini 3's multimodal vision capabi
 
 ### Step 1: Clone the Repository
 ```bash
-git clone [https://github.com/yourusername/IGL-AI.git](https://github.com/yourusername/IGL-AI.git)
+git clone [https://github.com/mufasa334/IGL-AI.git](https://github.com/mufasa334/IGL-AI.git)
 cd IGL-AI
+```
 Step 2: Set your API Key
 Security Warning: NEVER share your API key or commit it to GitHub. Set it as an Environment Variable on your machine:
 
